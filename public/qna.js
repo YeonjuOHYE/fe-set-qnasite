@@ -106,26 +106,32 @@ initQna = () => {
           let content = e.target.previousElementSibling.firstElementChild.value;
 
           (async () => {
-            ing = true;
-            const response = await fetch(
-              URL.ADD_REPLY.replace(":questionid", questionId),
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${Token.getToken()}`
-                },
-                body: JSON.stringify({ content: content }),
-                signal: signal
+            try {
+              ing = true;
+              const response = await fetch(
+                URL.ADD_REPLY.replace(":questionid", questionId),
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${Token.getToken()}`
+                  },
+                  body: JSON.stringify({ content: content }),
+                  signal: signal
+                }
+              );
+              if (response.status == "200") {
+                await initQna();
+              } else if (response.status == "401") {
+                alert("권한 문제가 발생했습니다.");
+              } else {
+                alert("에러가 발생했습니다.");
               }
-            );
-
-            if (response.status == "200") {
-              await initQna();
+            } catch (e) {
+              alert("에러가 발생했습니다!!");
+            } finally {
+              ing = false;
             }
-
-            ing = false;
-            return;
           })();
         });
       });
