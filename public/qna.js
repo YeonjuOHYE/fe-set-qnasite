@@ -1,6 +1,7 @@
 const URL = {
   INIT: "http://localhost:3000/api/questions",
-  LOGIN: "http://localhost:3000/api/login"
+  LOGIN: "http://localhost:3000/api/login",
+  TOKEN_VALIDATION: "http://localhost:3000/api/token-validation"
 };
 
 //util
@@ -62,4 +63,51 @@ document.addEventListener("DOMContentLoaded", () => {
   fetch(URL.INIT)
     .then(res => res.json())
     .then(result => renderQnA(result));
+
+  //localStorage에서 로그인 상태 및 유효성 확인
+  let token;
+  if ((token = localStorage.getItem("token"))) {
+    fetch(URL.TOKEN_VALIDATION, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then(res => res.json())
+      .then(response => {
+        let { authResult } = response;
+        if (authResult) {
+          $("#login-btn").innerText = "로그아웃";
+        }
+      });
+  }
+});
+
+//로그인 처리 함수
+$("#login-btn").addEventListener("click", e => {
+  if ($("#login-btn").innerText === "로그인") {
+    let user = prompt("Please enter your name", "yeonju");
+    fetch(URL.LOGIN, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ user: user })
+    })
+      .then(res => res.json())
+      .then(response => {
+        let { auth, token } = response;
+        if (auth) {
+          //1. 로컬스토리지에 저장
+          localStorage.setItem("token", token);
+          //2. 화면에서 로그인 상태 변경
+          $("#login-btn").innerText = "로그아웃";
+        } else {
+          return;
+        }
+      });
+  } else {
+    localStorage.clear("token");
+    $("#login-btn").innerText = "로그인";
+  }
 });
