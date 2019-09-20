@@ -25,10 +25,31 @@ function getAnswerTemplate(answers) {
   }, ``);
 }
 
-function getLoadingAnswerTpl() {
-  return `<li class="answer-list loading" ">
-        Loading.....
-     </li>`;
+function drawLoadingAnswerTpl(questionId) {
+  const loadingList = document.createElement("li");
+  loadingList.innerHTML = "Loading.....";
+  loadingList.setAttribute("class", "answer-list loading");
+
+  Array.from($$(".qna"))
+    .find(
+      elem =>
+        Array.from(elem.attributes).find(attr => attr.name === "_questionid")
+          .value == questionId
+    )
+    .querySelector(".answer")
+    .append(loadingList);
+}
+
+function removeLoadingAnswerTpl(questionId) {
+  const loadingList = Array.from($$(".qna"))
+    .find(
+      elem =>
+        Array.from(elem.attributes).find(attr => attr.name === "_questionid")
+          .value == questionId
+    )
+    .querySelector(".loading");
+
+  loadingList && loadingList.remove();
 }
 
 function getQnATemplate(data) {
@@ -106,8 +127,10 @@ initQna = () => {
           let content = e.target.previousElementSibling.firstElementChild.value;
 
           (async () => {
+            ing = true;
+            drawLoadingAnswerTpl(questionId);
+
             try {
-              ing = true;
               const response = await fetch(
                 URL.ADD_REPLY.replace(":questionid", questionId),
                 {
@@ -131,6 +154,7 @@ initQna = () => {
               alert("에러가 발생했습니다!!");
             } finally {
               ing = false;
+              removeLoadingAnswerTpl(questionId);
             }
           })();
         });
