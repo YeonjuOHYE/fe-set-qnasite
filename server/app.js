@@ -54,12 +54,32 @@ app.post(
   jwtValidator,
   jsonParser,
   (req, res) => {
-    const body = req.body;
-    if (!body) res.status(400).send({ error: "data is not found" });
-
-    //Promise를 활용한 지연 응답. 
+    const content = req.body.content;
+    if (!content) res.status(400).send({ error: "data is not found" });
+    //Promise를 활용한 지연 응답.
     //res.json메서드를 활용한 응답.
     //여기에 구현 필요
+
+    new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve();
+      }, 3000);
+    })
+      .then(() => {
+        try {
+          response_mock.addNewReply({
+            content: content,
+            questionId: req.params.questionid,
+            name: req.payload._id
+          });
+        } catch (exception) {
+          throw new Error();
+        }
+      })
+      .then(() => res.status(200).send({ msg: "success" }))
+      .catch(e => {
+        res.status(400).send({ msg: "fail" });
+      });
   }
 );
 
