@@ -59,7 +59,7 @@ export const answerService = {
 
         if (this.requestIng) {
           target.setAttribute("disabled", true);
-          abortController.abort();
+          this.abortController.abort();
           return;
         }
 
